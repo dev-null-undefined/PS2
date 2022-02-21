@@ -10,22 +10,23 @@ URL="https://gitlab.fit.cvut.cz/barinkl/bi-ps2-public/raw/master/edux/index.html
 
 FILE=$(mktemp)
 ROOT="courses"
-
 wget "$URL" -O "$FILE" &> /dev/null
 
-record_date=""
+lecture_prefixes="BMP"
+allowed_chars="A-Z.0-9"
 
-for record in $(sed -r -e '/.*href="[BMP]{1}[^"]*-[^"]*".*/!d' -e 's#.*href="[^"/]*/">([^/]*)/</a></td><td align="right">([^ <]*).*#\1,\2#' < "$FILE");
+for subject in $(sed -r -e "s/.*([$lecture_prefixes][$allowed_chars]*-[$allowed_chars]*).*/\\1/p;d" < "$FILE");
 do
-    record_date=$(sed -r -e 's#[^,]*,[0-9]{2}([0-9]*)-([0-9]*).*#\1;\2#' <<< "$record")
-    subject=$(cut -d "," -f 1,1 <<< $record)
     folder="$ROOT/$subject"
     mkdir -p "$folder"
     echo -n "===== $subject =====" > "$folder/index"
 done
 
-year=$(cut -d ";" -f1,1 <<< "$record_date")
-month=$(cut -d ";" -f2,2 <<< "$record_date")
+record_date=$(sed -r -e 's#.*([0-9]{4,6}-[0-9]{2}-[0-9]{2}).*#\1#p;d' < "$FILE" | head -n 1)
+
+year=$(cut -d "-" -f1,1 <<< "$record_date")
+month=$(cut -d "-" -f2,2 <<< "$record_date")
+year="${year: 2:2}"
 
 year_code="B$year"
 
