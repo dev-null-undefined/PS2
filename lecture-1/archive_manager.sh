@@ -11,16 +11,18 @@ ROOT="courses"
 
 current_date=$(date -u +"%Y-%m-%d_%H:%M:%S")
 
-if [[ -e "$FOLDER" ]]
+if [[ -e "$FOLDERx" ]]
 then
    echo "FAILED file exists '$FOLDER'"
    exit 1
 else
+    current_year=$(cat "$ROOT/info")
+    current_folder="${FOLDER}/${current_year}@${current_date}"
+    mkdir -p "$current_folder"
     for folder in "$ROOT"/*
     do
         subject=$(cut -d"/" -f2,2 <<< "$folder")
-        current_folder="${subject}@${current_date}"
-        mkdir -p "${FOLDER}/$current_folder"
-        ln -s "$current_folder" "${FOLDER}/${subject}"
+        mkdir -p "${current_folder}/${subject}"
     done
+    ln -sfn "${current_year}@${current_date}" "${FOLDER}/${current_year}"
 fi
