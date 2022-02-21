@@ -27,6 +27,12 @@ done
 
 record_date=$(sed -r -e 's#.*([0-9]{4,6}-[0-9]{2}-[0-9]{2}).*#\1#p;d' < "$FILE" | head -n 1)
 
+if ! [[ -n $record_date ]]
+then
+    echo "Could not find date data maybe be missleading"
+    exit 1
+fi
+
 year=$(cut -d "-" -f1,1 <<< "$record_date")
 month=$(cut -d "-" -f2,2 <<< "$record_date")
 year="${year: 2:2}"
