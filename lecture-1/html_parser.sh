@@ -5,7 +5,6 @@
 # Do každého adresáře předmětu vytvořte soubor index a do něj text ===== kód_předmětu ===== (případně můžete ze stránky předmětu zjisti jméno předmětu - viz např.: https://gitlab.fit.cvut.cz/barinkl/bi-ps2-public/raw/master/edux/BI-PS2/start.txt ).
 # V adresáři courses vytvořte soubor info do kterého uložíte kód semestru (např. B102, kde 10 je podle ak.roku a 2 znamená letní semestr).
 
-
 URL="https://gitlab.fit.cvut.cz/barinkl/bi-ps2-public/raw/master/edux/index.html"
 
 FILE=$(mktemp)
@@ -15,11 +14,15 @@ wget "$URL" -O "$FILE" &> /dev/null
 lecture_prefixes="BMP"
 allowed_chars="A-Z.0-9"
 
-for subject in $(sed -r -e "s/.*([$lecture_prefixes][$allowed_chars]*-[$allowed_chars]*).*/\\1/p;d" < "$FILE");
+for line in $(cat "$FILE");
 do
-    folder="$ROOT/$subject"
-    mkdir -p "$folder"
-    echo -n "===== $subject =====" > "$folder/index"
+    if [[ $line =~ ^.*([$lecture_prefixes][$allowed_chars]*-[$allowed_chars]*).*$ ]]
+    then
+        subject="${BASH_REMATCH[1]}"
+        folder="$ROOT/$subject"
+        mkdir -p "$folder"
+        echo -n "===== $subject =====" > "$folder/index"
+    fi
 done
 
 record_date=$(sed -r -e 's#.*([0-9]{4,6}-[0-9]{2}-[0-9]{2}).*#\1#p;d' < "$FILE" | head -n 1)
